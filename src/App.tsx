@@ -34,6 +34,11 @@ function App() {
       if (response.access_token) {
         console.log('🔐 Token recibido, estableciendo cookie...');
         setCookie('auth_token', response.access_token, 7);
+        try {
+          localStorage.setItem('auth_token', response.access_token);
+        } catch (e) {
+          console.warn('⚠️ No se pudo guardar token en localStorage:', e);
+        }
         
         // Verificar que el token sea válido antes de guardarlo
         const testUserData = decodeJWT(response.access_token);
@@ -44,11 +49,23 @@ function App() {
         
         console.log('✅ Token válido y guardado en cookie:', testUserData.email);
         setUser(testUserData);
+        try {
+          localStorage.setItem('user_data', JSON.stringify(testUserData));
+        } catch (e) {
+          console.warn('⚠️ No se pudo guardar usuario en localStorage:', e);
+        }
       } else {
         console.log('⚠️ No se recibió token en la respuesta, intentando obtener de cookies...');
         // Fallback: intentar leer la cookie establecida por el servidor
         const userData = getUserFromCookie();
         if (userData) {
+          // guardar respaldo en localStorage
+          try {
+            localStorage.setItem('auth_token', getCookie('auth_token') || '');
+            localStorage.setItem('user_data', JSON.stringify(userData));
+          } catch (e) {
+            console.warn('⚠️ No se pudo guardar respaldo de sesión en localStorage:', e);
+          }
           console.log('✅ Usuario obtenido desde cookies:', userData.email);
           setUser(userData);
         } else {
@@ -82,6 +99,12 @@ function App() {
 
   const handleLogout = () => {
     deleteCookie('auth_token');
+    try {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_data');
+    } catch (e) {
+      console.warn('⚠️ No se pudo limpiar localStorage:', e);
+    }
     setUser(null);
     setError(null);
   };

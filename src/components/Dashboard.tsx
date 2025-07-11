@@ -3,6 +3,7 @@ import { LogOut, User, Mail, Shield, Clock, Menu } from 'lucide-react';
 import { UserData } from '../types/auth';
 import { Sidebar } from './Sidebar';
 import { UsersSection } from './users/UsersSection';
+import { ExperiencesSection } from './experiences/ExperiencesSection';
 
 interface DashboardProps {
   user: UserData;
@@ -29,13 +30,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     switch (activeSection) {
       case 'usuarios':
         return <UsersSection />;
+      case 'experiencias':
+        return <ExperiencesSection />;
       default:
         return <div className="text-center py-12 text-gray-500">Sección en desarrollo</div>;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex overflow-hidden">
       {/* Sidebar */}
       <Sidebar
         isCollapsed={sidebarCollapsed}
@@ -45,7 +48,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="px-4 sm:px-6 lg:px-8">
@@ -80,7 +83,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 overflow-auto">
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
         {renderContent()}
       </main>
         </div>

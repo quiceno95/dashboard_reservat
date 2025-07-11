@@ -6,13 +6,15 @@ interface UserStatsProps {
   proveedores: number;
   mayoristas: number;
   administrativos: number;
+  loading?: boolean;
 }
 
 export const UserStats: React.FC<UserStatsProps> = ({
   totalUsers,
   proveedores,
   mayoristas,
-  administrativos
+  administrativos,
+  loading = false
 }) => {
   const stats = [
     {
@@ -60,9 +62,15 @@ export const UserStats: React.FC<UserStatsProps> = ({
                 <p className="text-sm font-medium text-gray-600 mb-1">
                   {stat.title}
                 </p>
-                <p className={`text-3xl font-bold ${stat.textColor}`}>
-                  {stat.value.toLocaleString()}
-                </p>
+                {loading ? (
+                  <div className="animate-pulse">
+                    <div className="h-8 bg-gray-200 rounded w-16"></div>
+                  </div>
+                ) : (
+                  <p className={`text-3xl font-bold ${stat.textColor}`}>
+                    {stat.value.toLocaleString()}
+                  </p>
+                )}
               </div>
               <div className={`${stat.color} p-3 rounded-lg`}>
                 <Icon className="h-6 w-6 text-white" />

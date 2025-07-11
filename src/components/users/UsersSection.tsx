@@ -17,9 +17,11 @@ export const UsersSection: React.FC = () => {
   const [createLoading, setCreateLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(5);
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const [notification, setNotification] = useState<{
     type: 'success' | 'error';
     message: string;
@@ -32,38 +34,344 @@ export const UsersSection: React.FC = () => {
     mayoristas: 0,
     administrativos: 0
   });
+  const [statsLoading, setStatsLoading] = useState(true);
 
   // Estados para gráficos (datos simulados por ahora)
-  const [monthlyRegistrations] = useState([
-    { month: 'Ene', count: 45 },
-    { month: 'Feb', count: 52 },
-    { month: 'Mar', count: 38 },
-    { month: 'Abr', count: 61 },
-    { month: 'May', count: 55 },
-    { month: 'Jun', count: 67 }
-  ]);
-
-  const [recentLogins] = useState([
-    { date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), count: 23 },
-    { date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), count: 31 },
-    { date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), count: 18 },
-    { date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), count: 42 },
-    { date: new Date().toISOString(), count: 35 }
-  ]);
+  const [monthlyRegistrations, setMonthlyRegistrations] = useState<{ month: string; count: number }[]>([]);
+  const [chartsLoading, setChartsLoading] = useState(true);
+  const [recentLogins, setRecentLogins] = useState<{ date: string; count: number }[]>([]);
 
   useEffect(() => {
-    loadUsers();
-  }, [currentPage, pageSize]);
+    if (searchTerm.trim()) {
+      handleSearch(searchTerm);
+    } else {
+      loadUsers();
+    }
+    
+    // Cargar estadísticas independientemente
+    loadStats();
+    
+    // Cargar datos para gráficas
+    loadChartsData();
+  }, [currentPage, pageSize, searchTerm]);
 
-  useEffect(() => {
-    // Calcular estadísticas cuando cambien los usuarios
-    const total = users.length;
-    const proveedores = users.filter(u => u.tipo_usuario === 'proveedor').length;
-    const mayoristas = users.filter(u => u.tipo_usuario === 'mayorista').length;
-    const administrativos = users.filter(u => u.tipo_usuario === 'administrador').length;
+  const loadStats = async () => {
+    try {
+      setStatsLoading(true);
+      console.log('📊 Cargando estadísticas completas...');
+      const statsData = await userService.getUserStats();
+      console.log('📊 Estadísticas recibidas:', statsData);
+      setStats(statsData);
+    } catch (error) {
+      console.error('Error cargando estadísticas:', error);
+      // Mantener estadísticas en 0 si hay error
+      setStats({
+        total: 0,
+        proveedores: 0,
+        mayoristas: 0,
+        administrativos: 0
+      });
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
-    setStats({ total, proveedores, mayoristas, administrativos });
-  }, [users]);
+  const loadChartsData = async () => {
+    try {
+      setChartsLoading(true);
+      console.log('📊 Cargando datos para gráficas...');
+      
+      // Obtener todos los usuarios para procesar las fechas
+      const allUsersData = await userService.getUsers(1, 1000);
+      const allUsers = Array.isArray(allUsersData) ? allUsersData : allUsersData.usuarios || [];
+      
+      console.log('📊 Total de usuarios para gráficas:', allUsers.length);
+      
+      // Procesar registros mensuales de los últimos 5 meses
+      const monthlyData = processMonthlyRegistrations(allUsers);
+      setMonthlyRegistrations(monthlyData);
+      
+      // Procesar logins recientes de los últimos 5 días
+      const recentLoginsData = processRecentLogins(allUsers);
+      setRecentLogins(recentLoginsData);
+      
+      console.log('📊 Datos mensuales procesados:', monthlyData);
+      console.log('📊 Datos de logins recientes procesados:', recentLoginsData);
+    } catch (error) {
+      console.error('Error cargando datos para gráficas:', error);
+      // Mantener datos vacíos si hay error
+      setMonthlyRegistrations([]);
+      setRecentLogins([]);
+    } finally {
+      setChartsLoading(false);
+    }
+  };
+
+  const processMonthlyRegistrations = (users: User[]): { month: string; count: number }[] => {
+    console.log('📅 === PROCESANDO REGISTROS MENSUALES ===');
+    
+    // Obtener la fecha actual
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-11
+    
+    console.log('📅 Fecha actual:', now.toISOString());
+    console.log('📅 Año actual:', currentYear);
+    console.log('📅 Mes actual (0-11):', currentMonth);
+    
+    // Generar los últimos 5 meses (incluyendo el actual)
+    const months = [];
+    for (let i = 4; i >= 0; i--) {
+      const date = new Date(currentYear, currentMonth - i, 1);
+      months.push({
+        year: date.getFullYear(),
+        month: date.getMonth(),
+        monthName: date.toLocaleDateString('es-ES', { month: 'short' }).replace('.', ''),
+        key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      });
+    }
+    
+    console.log('📅 Meses a procesar:', months);
+    
+    // Inicializar contadores
+    const monthCounts: { [key: string]: number } = {};
+    months.forEach(m => {
+      monthCounts[m.key] = 0;
+    });
+    
+    console.log('📅 Contadores inicializados:', monthCounts);
+    
+    // Procesar cada usuario
+    users.forEach((user, index) => {
+      if (index < 5) { // Solo mostrar los primeros 5 para debugging
+        console.log(`📅 Usuario ${index + 1}:`, {
+          email: user.email,
+          fecha_registro: user.fecha_registro,
+          tipo: typeof user.fecha_registro
+        });
+      }
+      
+      // Intentar obtener la fecha de registro
+      let fechaRegistro: Date | null = null;
+      
+      // Lista de posibles campos de fecha (actualizada según la API)
+      const possibleDateFields = [
+        'fecha_registro',     // ✅ Campo principal según la API
+        'fechaRegistro',
+        'fecha_creacion',
+        'fechaCreacion',
+        'created_at',
+        'createdAt',
+        'date_created',
+        'dateCreated'
+      ];
+      
+      for (const field of possibleDateFields) {
+        if (user[field as keyof User]) {
+          try {
+            const dateValue = user[field as keyof User];
+            if (typeof dateValue === 'string') {
+              fechaRegistro = new Date(dateValue);
+              if (!isNaN(fechaRegistro.getTime())) {
+                if (index < 5) {
+                  console.log(`✅ Fecha válida encontrada en ${field}:`, fechaRegistro.toISOString());
+                }
+                break;
+              }
+            }
+          } catch (error) {
+            if (index < 5) {
+              console.log(`❌ Error parseando ${field}:`, error);
+            }
+          }
+        }
+      }
+      
+      if (!fechaRegistro) {
+        if (index < 5) {
+          console.log(`❌ No se pudo obtener fecha para usuario:`, user.email);
+        }
+        return;
+      }
+      
+      // Obtener año y mes de la fecha de registro
+      const registroYear = fechaRegistro.getFullYear();
+      const registroMonth = fechaRegistro.getMonth();
+      const registroKey = `${registroYear}-${String(registroMonth + 1).padStart(2, '0')}`;
+      
+      if (index < 5) {
+        console.log(`📅 Usuario ${index + 1} - Fecha procesada:`, {
+          fecha: fechaRegistro.toISOString(),
+          año: registroYear,
+          mes: registroMonth,
+          key: registroKey,
+          estaEnRango: monthCounts.hasOwnProperty(registroKey)
+        });
+      }
+      
+      // Incrementar contador si está en el rango de los últimos 5 meses
+      if (monthCounts.hasOwnProperty(registroKey)) {
+        monthCounts[registroKey]++;
+        if (index < 5) {
+          console.log(`✅ Incrementado contador para ${registroKey}: ${monthCounts[registroKey]}`);
+        }
+      }
+    });
+    
+    console.log('📅 Contadores finales:', monthCounts);
+    
+    // Convertir a formato para la gráfica
+    const result = months.map(m => ({
+      month: m.monthName,
+      count: monthCounts[m.key] || 0
+    }));
+    
+    console.log('📅 Resultado final para gráfica:', result);
+    
+    return result;
+  };
+
+  const processRecentLogins = (users: User[]): { date: string; count: number }[] => {
+    console.log('🔐 === PROCESANDO LOGINS RECIENTES ===');
+    
+    // Obtener la fecha actual en la zona horaria local
+    const now = new Date();
+    
+    // Crear fecha de hoy sin hora (medianoche local)
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    console.log('🔐 Fecha actual:', now.toISOString());
+    console.log('🔐 Hoy (sin hora):', today.toISOString());
+    console.log('🔐 Zona horaria local:', Intl.DateTimeFormat().resolvedOptions().timeZone);
+    
+    // Generar los últimos 5 días (incluyendo hoy)
+    const days = [];
+    for (let i = 4; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      
+      // Crear la fecha en formato local para comparación
+      const localDateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      
+      days.push({
+        date: date.toISOString(),
+        dateKey: localDateKey, // YYYY-MM-DD en zona local
+        displayName: date.toLocaleDateString('es-ES', { 
+          month: 'short', 
+          day: 'numeric' 
+        }),
+        dayNumber: date.getDate(),
+        monthNumber: date.getMonth() + 1,
+        yearNumber: date.getFullYear()
+      });
+    }
+    
+    console.log('🔐 Días a procesar:', days);
+    
+    // Inicializar contadores
+    const dayCounts: { [key: string]: number } = {};
+    days.forEach(d => {
+      dayCounts[d.dateKey] = 0;
+    });
+    
+    console.log('🔐 Contadores inicializados:', dayCounts);
+    
+    // Procesar cada usuario
+    users.forEach((user, index) => {
+      if (index < 5) { // Solo mostrar los primeros 5 para debugging
+        console.log(`🔐 Usuario ${index + 1}:`, {
+          email: user.email,
+          ultimo_login: user.ultimo_login,
+          tipo: typeof user.ultimo_login
+        });
+      }
+      
+      // Verificar si tiene último login
+      if (!user.ultimo_login) {
+        if (index < 5) {
+          console.log(`❌ Usuario ${index + 1} sin último login:`, user.email);
+        }
+        return;
+      }
+      
+      try {
+        const loginDate = new Date(user.ultimo_login);
+        
+        if (isNaN(loginDate.getTime())) {
+          if (index < 5) {
+            console.log(`❌ Fecha de login inválida para usuario ${index + 1}:`, user.ultimo_login);
+          }
+          return;
+        }
+        
+        // CORRECCIÓN: Obtener la fecha en zona horaria local, no UTC
+        const loginYear = loginDate.getFullYear();
+        const loginMonth = loginDate.getMonth() + 1; // getMonth() devuelve 0-11
+        const loginDay = loginDate.getDate();
+        const loginDateKey = `${loginYear}-${String(loginMonth).padStart(2, '0')}-${String(loginDay).padStart(2, '0')}`;
+        
+        if (index < 5) {
+          console.log(`🔐 Usuario ${index + 1} - Login procesado:`, {
+            fechaOriginal: user.ultimo_login,
+            fechaParseada: loginDate.toISOString(),
+            fechaLocal: loginDate.toLocaleDateString('es-ES'),
+            año: loginYear,
+            mes: loginMonth,
+            día: loginDay,
+            fechaKey: loginDateKey,
+            estaEnRango: dayCounts.hasOwnProperty(loginDateKey),
+            diasDisponibles: Object.keys(dayCounts)
+          });
+        }
+        
+        // Incrementar contador si está en el rango de los últimos 5 días
+        if (dayCounts.hasOwnProperty(loginDateKey)) {
+          dayCounts[loginDateKey]++;
+          if (index < 5) {
+            console.log(`✅ Incrementado contador para ${loginDateKey}: ${dayCounts[loginDateKey]}`);
+          }
+        } else {
+          if (index < 5) {
+            console.log(`⚠️ Login fuera del rango de 5 días: ${loginDateKey} (disponibles: ${Object.keys(dayCounts).join(', ')})`);
+          }
+        }
+        
+      } catch (error) {
+        if (index < 5) {
+          console.log(`❌ Error procesando login para usuario ${index + 1}:`, error);
+        }
+      }
+    });
+    
+    console.log('🔐 Contadores finales:', dayCounts);
+    console.log('🔐 Días procesados:', days.map(d => ({ 
+      fecha: d.displayName, 
+      key: d.dateKey, 
+      count: dayCounts[d.dateKey] 
+    })));
+    
+    // Convertir a formato para la gráfica
+    const result = days.map(d => ({
+      date: d.date,
+      count: dayCounts[d.dateKey] || 0
+    }));
+    
+    console.log('🔐 Resultado final para gráfica:', result);
+    
+    // Verificación adicional para debugging
+    console.log('🔐 === VERIFICACIÓN FINAL ===');
+    result.forEach((item, index) => {
+      const displayDate = new Date(item.date).toLocaleDateString('es-ES', { 
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long', 
+        day: 'numeric' 
+      });
+      console.log(`Día ${index + 1}: ${displayDate} = ${item.count} logins`);
+    });
+    
+    return result;
+  };
 
   const loadUsers = async () => {
     try {
@@ -112,6 +420,9 @@ export const UsersSection: React.FC = () => {
       
       // Reload users to show the new user
       await loadUsers();
+      
+      // Recargar estadísticas después de crear usuario
+      await loadStats();
       
       // Show success message from API or default message
       const successMessage = result.message || 'Usuario creado correctamente';
@@ -379,6 +690,77 @@ export const UsersSection: React.FC = () => {
     }
   };
 
+  const handleSearch = async (term: string) => {
+    if (!term.trim()) {
+      // Si no hay término de búsqueda, cargar usuarios normalmente
+      setIsSearching(false);
+      setSearchTerm('');
+      loadUsers();
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      setLoading(true);
+      
+      console.log('🔍 Iniciando búsqueda global:', term);
+      
+      // Obtener todos los usuarios para búsqueda local
+      const allUsersData = await userService.getUsers(1, 1000);
+      const allUsers = Array.isArray(allUsersData) ? allUsersData : allUsersData.usuarios || [];
+      
+      // Filtrar localmente
+      const filteredUsers = allUsers.filter(user =>
+        user.nombre.toLowerCase().includes(term.toLowerCase()) ||
+        user.apellido.toLowerCase().includes(term.toLowerCase()) ||
+        user.email.toLowerCase().includes(term.toLowerCase()) ||
+        user.tipo_usuario.toLowerCase().includes(term.toLowerCase())
+      );
+      
+      // Aplicar paginación manual
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedResults = filteredUsers.slice(startIndex, endIndex);
+      
+      setUsers(paginatedResults);
+      setTotalUsers(filteredUsers.length);
+      setTotalPages(Math.ceil(filteredUsers.length / pageSize));
+      
+      console.log(`✅ Búsqueda local completada: ${filteredUsers.length} resultados encontrados`);
+      
+      if (filteredUsers.length === 0) {
+        showNotification('error', `No se encontraron usuarios que coincidan con "${term}"`);
+      }
+    } catch (error) {
+      console.error('Error en búsqueda local:', error);
+      setUsers([]);
+      setTotalUsers(0);
+      setTotalPages(0);
+      showNotification('error', 'Error al buscar usuarios');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearchChange = (term: string) => {
+    setSearchTerm(term);
+    setCurrentPage(1); // Reset to first page when searching
+    
+    if (!term.trim()) {
+      setIsSearching(false);
+      loadUsers();
+    } else {
+      setIsSearching(true);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+    setIsSearching(false);
+    setCurrentPage(1);
+    loadUsers();
+  };
+
   const handleDeleteUser = async (userId: string) => {
     // Find the user to get their name for the confirmation
     const userToDelete = users.find(user => user.id === userId);
@@ -440,6 +822,9 @@ export const UsersSection: React.FC = () => {
         // Reload current page to get updated data
         loadUsers();
       }
+      
+      // Recargar estadísticas después de eliminar usuario
+      await loadStats();
       
       // Show success message from API or default message
       const successMessage = (result && typeof result === 'object' && 'message' in result) 
@@ -566,6 +951,10 @@ export const UsersSection: React.FC = () => {
       {/* Users Table */}
       <UserTable
         users={users}
+        searchTerm={searchTerm}
+        isSearching={isSearching}
+        onSearchChange={handleSearchChange}
+        onClearSearch={clearSearch}
         onDelete={handleDeleteUser}
         loading={loading}
         currentPage={currentPage}
@@ -579,6 +968,7 @@ export const UsersSection: React.FC = () => {
       {/* Charts */}
       <UserCharts
         monthlyRegistrations={monthlyRegistrations}
+        chartsLoading={chartsLoading}
         recentLogins={recentLogins}
       />
 

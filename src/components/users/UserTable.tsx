@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { Search, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Trash2, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { User } from '../../types/user';
 
 interface UserTableProps {
   users: User[];
+  searchTerm: string;
+  isSearching: boolean;
+  onSearchChange: (term: string) => void;
+  onClearSearch: () => void;
   onDelete: (userId: string) => void;
   loading: boolean;
   currentPage: number;
@@ -16,6 +20,10 @@ interface UserTableProps {
 
 export const UserTable: React.FC<UserTableProps> = ({
   users,
+  searchTerm,
+  isSearching,
+  onSearchChange,
+  onClearSearch,
   onDelete,
   loading,
   currentPage,
@@ -25,28 +33,14 @@ export const UserTable: React.FC<UserTableProps> = ({
   onPageChange,
   onPageSizeChange
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [localSearchTerm, setLocalSearchTerm] = useState('');
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Ensure users is an array before filtering
   const safeUsers = Array.isArray(users) ? users : [];
   
-  // For pagination, we don't filter here since filtering should be done server-side
-  // But we keep local search for immediate feedback
-  const displayUsers = searchTerm 
-    ? safeUsers.filter(user =>
-        user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.tipo_usuario.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : safeUsers;
-
-  const filteredUsers = displayUsers.filter(user =>
-    user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.tipo_usuario.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Ya no necesitamos filtrar aquí porque la búsqueda se hace en el servidor
+  const displayUsers = safeUsers;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
@@ -122,6 +116,31 @@ export const UserTable: React.FC<UserTableProps> = ({
     return pages;
   };
 
+  const handleLocalSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLocalSearchTerm(value);
+    
+    // Clear previous timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    
+    // Set new timeout for debounced search
+    const newTimeout = setTimeout(() => {
+      onSearchChange(value);
+    }, 500); // 500ms delay
+    
+    setSearchTimeout(newTimeout);
+  };
+
+  const handleClearSearch = () => {
+    setLocalSearchTerm('');
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    onClearSearch();
+  };
+
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-8">
@@ -143,7 +162,18 @@ export const UserTable: React.FC<UserTableProps> = ({
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">
-            Lista de Usuarios ({totalUsers} total)
+            {isSearching ? (
+              <span>
+                Resultados de búsqueda: <span className="text-blue-600">{totalUsers}</span> usuarios encontrados
+                {searchTerm && (
+                  <span className="text-sm font-normal text-gray-600 ml-2">
+                    para "{searchTerm}"
+                  </span>
+                )}
+              </span>
+            ) : (
+              `Lista de Usuarios (${totalUsers} total)`
+            )}
           </h3>
           
           {/* Page Size Selector */}
@@ -152,7 +182,7 @@ export const UserTable: React.FC<UserTableProps> = ({
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -165,16 +195,34 @@ export const UserTable: React.FC<UserTableProps> = ({
         
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+            <Search className={`h-5 w-5 ${isSearching ? 'text-blue-500' : 'text-gray-400'}`} />
           </div>
           <input
             type="text"
-            placeholder="Buscar por nombre, apellido, email o tipo..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Buscar usuarios en toda la base de datos..."
+            value={localSearchTerm}
+            onChange={handleLocalSearchChange}
+            className={`block w-full pl-10 pr-12 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+              isSearching ? 'border-blue-300 bg-blue-50' : 'border-gray-300'
+            }`}
           />
+          {(localSearchTerm || isSearching) && (
+            <button
+              onClick={handleClearSearch}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              title="Limpiar búsqueda"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
         </div>
+        
+        {isSearching && (
+          <div className="mt-2 text-sm text-blue-600 flex items-center">
+            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+            Buscando en toda la base de datos...
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -203,7 +251,7 @@ export const UserTable: React.FC<UserTableProps> = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredUsers.map((user) => (
+            {displayUsers.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
@@ -252,10 +300,26 @@ export const UserTable: React.FC<UserTableProps> = ({
           </tbody>
         </table>
         
-        {filteredUsers.length === 0 && (
+        {displayUsers.length === 0 && (
           <div className="text-center py-12">
             <div className="text-gray-500">
-              {searchTerm ? 'No se encontraron usuarios que coincidan con la búsqueda' : 'No hay usuarios registrados'}
+              {isSearching || searchTerm ? (
+                <div>
+                  <Search className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-lg font-medium text-gray-900 mb-2">No se encontraron resultados</p>
+                  <p className="text-gray-500">
+                    No hay usuarios que coincidan con "{searchTerm || localSearchTerm}"
+                  </p>
+                  <button
+                    onClick={handleClearSearch}
+                    className="mt-4 text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    Limpiar búsqueda
+                  </button>
+                </div>
+              ) : (
+                'No hay usuarios registrados'
+              )}
             </div>
           </div>
         )}

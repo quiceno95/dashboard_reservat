@@ -32,7 +32,7 @@ const menuItems = [
   { id: 'mayoristas', label: 'Mayoristas', icon: Store },
   { id: 'rutas', label: 'Rutas', icon: Route },
   { id: 'viajes', label: 'Viajes', icon: MapPin },
-  { id: 'fechas-bloqueadas', label: 'Fechas Bloqueadas', icon: Calendar },
+  { id: 'fechas-bloqueadas', label: 'Restricciones', icon: Calendar },
   { id: 'fotos', label: 'Fotos', icon: Image },
 ];
 
@@ -43,9 +43,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSectionChange 
 }) => {
   return (
-    <div className={`bg-white border-r border-gray-200 transition-all duration-300 ${
+    <div className={`bg-white border-r border-gray-200 transition-all duration-300 flex-shrink-0 ${
       isCollapsed ? 'w-16' : 'w-64'
-    } flex flex-col h-full`}>
+    } flex flex-col h-full overflow-hidden`}>
       {/* Header */}
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
         {!isCollapsed && (
@@ -62,15 +62,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
         >
           {isCollapsed ? (
-            <ChevronRight className="h-5 w-5 text-gray-600" />
+            <ChevronRight className="h-6 w-6 text-gray-600" />
           ) : (
-            <ChevronLeft className="h-5 w-5 text-gray-600" />
+            <ChevronLeft className="h-6 w-6 text-gray-600" />
           )}
         </button>
       </div>
 
       {/* Menu Items */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
@@ -79,16 +79,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={item.id}
               onClick={() => onSectionChange(item.id)}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 rounded-lg transition-all duration-300 ${
                 isActive 
                   ? 'bg-blue-50 text-blue-700 border border-blue-200' 
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
               title={isCollapsed ? item.label : undefined}
             >
-              <Icon className={`h-5 w-5 ${isActive ? 'text-blue-700' : 'text-gray-500'}`} />
+              <Icon 
+                className={`${isActive ? 'text-blue-700' : 'text-gray-500'} flex-shrink-0`}
+                size={isCollapsed ? 22 : 20}
+              />
               {!isCollapsed && (
-                <span className="font-medium">{item.label}</span>
+                <span className="font-medium whitespace-nowrap">{item.label}</span>
               )}
             </button>
           );

@@ -6,6 +6,6 @@ export interface User {
   contraseña: string;
   tipo_usuario: 'administrador' | 'proveedor' | 'mayorista' | 'cliente';
   activo: boolean;
-  fecha_creacion: string;
+  fecha_registro: string;  // ✅ Campo correcto según la API
   ultimo_login: string | null;
 }

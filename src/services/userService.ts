@@ -90,6 +90,47 @@ class UserService {
     }
   }
 
+  async getUserStats(): Promise<{
+    total: number;
+    proveedores: number;
+    mayoristas: number;
+    administrativos: number;
+  }> {
+    try {
+      console.log('📊 Obteniendo estadísticas completas de usuarios...');
+      
+      // Obtener todos los usuarios para calcular estadísticas
+      const response = await fetch(`${API_BASE_URL}/usuarios/listar/?page=1&size=1000`, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const allUsers = Array.isArray(data) ? data : data.usuarios || [];
+      
+      console.log('📊 Total de usuarios obtenidos para estadísticas:', allUsers.length);
+      
+      // Calcular estadísticas
+      const stats = {
+        total: allUsers.length,
+        proveedores: allUsers.filter(u => u.tipo_usuario === 'proveedor').length,
+        mayoristas: allUsers.filter(u => u.tipo_usuario === 'mayorista').length,
+        administrativos: allUsers.filter(u => u.tipo_usuario === 'admin').length
+      };
+      
+      console.log('📊 Estadísticas calculadas:', stats);
+      return stats;
+    } catch (error) {
+      console.error('Error obteniendo estadísticas de usuarios:', error);
+      throw error;
+    }
+  }
+
   async getUserById(id: string): Promise<User> {
     try {
       const response = await fetch(`${API_BASE_URL}/usuarios/${id}`, {

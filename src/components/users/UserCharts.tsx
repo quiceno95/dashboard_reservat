@@ -3,11 +3,13 @@ import { BarChart3, TrendingUp } from 'lucide-react';
 
 interface UserChartsProps {
   monthlyRegistrations: { month: string; count: number }[];
+  chartsLoading?: boolean;
   recentLogins: { date: string; count: number }[];
 }
 
 export const UserCharts: React.FC<UserChartsProps> = ({
   monthlyRegistrations,
+  chartsLoading = false,
   recentLogins
 }) => {
   const maxMonthlyValue = Math.max(...monthlyRegistrations.map(item => item.count));
@@ -27,30 +29,44 @@ export const UserCharts: React.FC<UserChartsProps> = ({
           </div>
         </div>
         
-        <div className="space-y-4">
-          {monthlyRegistrations.map((item, index) => (
-            <div key={index} className="flex items-center">
-              <div className="w-20 text-sm text-gray-600 font-medium">
-                {item.month}
+        {chartsLoading ? (
+          <div className="space-y-4">
+            {[...Array(5)].map((_, index) => (
+              <div key={index} className="flex items-center animate-pulse">
+                <div className="w-20 h-4 bg-gray-200 rounded"></div>
+                <div className="flex-1 mx-4">
+                  <div className="bg-gray-200 rounded-full h-3"></div>
+                </div>
+                <div className="w-12 h-4 bg-gray-200 rounded"></div>
               </div>
-              <div className="flex-1 mx-4">
-                <div className="bg-gray-200 rounded-full h-3">
-                  <div
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500"
-                    style={{
-                      width: `${maxMonthlyValue > 0 ? (item.count / maxMonthlyValue) * 100 : 0}%`
-                    }}
-                  ></div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {monthlyRegistrations.map((item, index) => (
+              <div key={index} className="flex items-center">
+                <div className="w-20 text-sm text-gray-600 font-medium">
+                  {item.month}
+                </div>
+                <div className="flex-1 mx-4">
+                  <div className="bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${maxMonthlyValue > 0 ? (item.count / maxMonthlyValue) * 100 : 0}%`
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <div className="w-12 text-sm font-semibold text-gray-900 text-right">
+                  {item.count}
                 </div>
               </div>
-              <div className="w-12 text-sm font-semibold text-gray-900 text-right">
-                {item.count}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
         
-        {monthlyRegistrations.length === 0 && (
+        {!chartsLoading && monthlyRegistrations.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             No hay datos de registros disponibles
           </div>
@@ -69,33 +85,47 @@ export const UserCharts: React.FC<UserChartsProps> = ({
           </div>
         </div>
         
-        <div className="space-y-4">
-          {recentLogins.map((item, index) => (
-            <div key={index} className="flex items-center">
-              <div className="w-20 text-sm text-gray-600 font-medium">
-                {new Date(item.date).toLocaleDateString('es-ES', { 
-                  month: 'short', 
-                  day: 'numeric' 
-                })}
+        {chartsLoading ? (
+          <div className="space-y-4">
+            {[...Array(5)].map((_, index) => (
+              <div key={index} className="flex items-center animate-pulse">
+                <div className="w-20 h-4 bg-gray-200 rounded"></div>
+                <div className="flex-1 mx-4">
+                  <div className="bg-gray-200 rounded-full h-3"></div>
+                </div>
+                <div className="w-12 h-4 bg-gray-200 rounded"></div>
               </div>
-              <div className="flex-1 mx-4">
-                <div className="bg-gray-200 rounded-full h-3">
-                  <div
-                    className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-500"
-                    style={{
-                      width: `${maxRecentValue > 0 ? (item.count / maxRecentValue) * 100 : 0}%`
-                    }}
-                  ></div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {recentLogins.map((item, index) => (
+              <div key={index} className="flex items-center">
+                <div className="w-20 text-sm text-gray-600 font-medium">
+                  {new Date(item.date).toLocaleDateString('es-ES', { 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}
+                </div>
+                <div className="flex-1 mx-4">
+                  <div className="bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${maxRecentValue > 0 ? (item.count / maxRecentValue) * 100 : 0}%`
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <div className="w-12 text-sm font-semibold text-gray-900 text-right">
+                  {item.count}
                 </div>
               </div>
-              <div className="w-12 text-sm font-semibold text-gray-900 text-right">
-                {item.count}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
         
-        {recentLogins.length === 0 && (
+        {!chartsLoading && recentLogins.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             No hay datos de logins recientes
           </div>
