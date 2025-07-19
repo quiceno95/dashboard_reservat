@@ -52,6 +52,12 @@ export interface HotelUnificado {
   ciudad: string;
   pais: string;
   email: string;
+  telefono?: string;
+  direccion?: string;
+  sitio_web?: string;
+  ubicacion?: string;
+  rating_promedio?: number;
+  descripcion?: string;
   verificado: boolean;
   tipo_documento: string;
   numero_documento: string;
@@ -60,6 +66,8 @@ export interface HotelUnificado {
   estrellas: number;
   numero_habitaciones: number;
   servicios_incluidos: string;
+  check_in?: string;
+  check_out?: string;
   recepcion_24_horas: boolean;
   piscina: boolean;
 }

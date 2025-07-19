@@ -7,6 +7,7 @@ import { EditHotelModal } from './EditHotelModal';
 import { CreateHotelModal } from './CreateHotelModal';
 import { Download, Plus, Hotel, CheckCircle, LayoutList, Search, X } from 'lucide-react';
 import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
 
 export const HotelsSection: React.FC = () => {
   const [hotels, setHotels] = useState<HotelUnificado[]>([]);
@@ -205,6 +206,123 @@ export const HotelsSection: React.FC = () => {
     }
   };
 
+  // Exportar hoteles a Excel
+  const handleExportHotels = async () => {
+    try {
+      await Swal.fire({
+        title: 'Generando archivo...',
+        text: 'Por favor espera mientras se genera el archivo Excel',
+        icon: 'info',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true
+      });
+
+      // Obtener todos los hoteles
+      const data = await hotelService.getHotels(1, 1000);
+      const hotelesData: HotelUnificado[] = Array.isArray(data) ? data : [];
+
+      if (!hotelesData.length) {
+        await Swal.fire({
+          title: 'Sin datos',
+          text: 'No hay hoteles para exportar',
+          icon: 'warning',
+          confirmButtonColor: '#f59e0b',
+          confirmButtonText: 'Entendido',
+          customClass: {
+            popup: 'rounded-xl shadow-2xl',
+            title: 'text-xl font-bold text-gray-900',
+            confirmButton: 'px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg',
+          },
+          buttonsStyling: false
+        });
+        return;
+      }
+
+      // Convertir a formato plano para la hoja de Excel
+      const rows = hotelesData.map(hotel => ({
+        'Nombre Hotel': hotel.nombre_proveedor,
+        'Ciudad': hotel.ciudad,
+        'País': hotel.pais,
+        'Email': hotel.email || '',
+        'Teléfono': hotel.telefono || '',
+        'Dirección': hotel.direccion || '',
+        'Sitio Web': hotel.sitio_web || '',
+        'Estrellas': hotel.estrellas,
+        'Habitaciones': hotel.numero_habitaciones,
+        'Tipo Documento': hotel.tipo_documento || '',
+        'Número Documento': hotel.numero_documento || '',
+        'Servicios': hotel.servicios_incluidos || '',
+        'Check-in': hotel.check_in || '',
+        'Check-out': hotel.check_out || '',
+        'Recepción 24h': hotel.recepcion_24_horas ? 'Sí' : 'No',
+        'Piscina': hotel.piscina ? 'Sí' : 'No',
+        'Verificado': hotel.verificado ? 'Sí' : 'No',
+        'Ubicación': hotel.ubicacion || '',
+        'Rating': hotel.rating_promedio || 0,
+        'Descripción': hotel.descripcion || ''
+      }));
+
+      // Crear hoja de Excel
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Hoteles');
+
+      // Generar fecha para el nombre del archivo
+      const fecha = new Date().toISOString().split('T')[0];
+      
+      // Generar ArrayBuffer y descargar manualmente para asegurar extensión
+      const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([wbout], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `hoteles_${fecha}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      // Mostrar confirmación de éxito
+      await Swal.fire({
+        title: '¡Archivo Exportado!',
+        text: `Se han exportado ${hotelesData.length} hoteles exitosamente.`,
+        icon: 'success',
+        confirmButtonColor: '#10b981',
+        confirmButtonText: 'Entendido',
+        customClass: {
+          popup: 'rounded-xl shadow-2xl',
+          title: 'text-xl font-bold text-gray-900',
+          confirmButton: 'px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg',
+        },
+        buttonsStyling: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+      
+    } catch (error) {
+      console.error('Error exportando hoteles:', error);
+      
+      await Swal.fire({
+        title: 'Error',
+        text: 'No se pudo exportar el archivo. Por favor intenta nuevamente.',
+        icon: 'error',
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'Entendido',
+        customClass: {
+          popup: 'rounded-xl shadow-2xl',
+          title: 'text-xl font-bold text-gray-900',
+          confirmButton: 'px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg',
+        },
+        buttonsStyling: false
+      });
+    }
+  };
+
   // Filtrar en memoria (barra de búsqueda global)
   useEffect(() => {
     const term = search.toLowerCase();
@@ -230,7 +348,10 @@ export const HotelsSection: React.FC = () => {
           <p className="text-gray-600 mt-2">Administra todos los hoteles del sistema</p>
         </div>
         <div className="flex items-center space-x-3">
-          <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+          <button 
+            onClick={handleExportHotels}
+            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+          >
             <Download className="h-5 w-5" />
             <span>Exportar Hoteles</span>
           </button>
