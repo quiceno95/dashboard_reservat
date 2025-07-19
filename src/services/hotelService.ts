@@ -63,6 +63,17 @@ class HotelService {
     }
     return response.json();
   }
+
+  async deleteHotel(id: string) {
+    const response = await fetch(`${API_BASE_URL}/hoteles/eliminar/${id}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}`);
+    }
+    return response.json();
+  }
 }
 
 export const hotelService = new HotelService();

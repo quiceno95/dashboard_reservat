@@ -5,6 +5,7 @@ import { HotelTable } from './HotelTable';
 import { HotelDetailModal } from './HotelDetailModal';
 import { EditHotelModal } from './EditHotelModal';
 import { Download, Plus, Hotel, CheckCircle, LayoutList, Search, X } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 export const HotelsSection: React.FC = () => {
   const [hotels, setHotels] = useState<HotelUnificado[]>([]);
@@ -59,6 +60,94 @@ export const HotelsSection: React.FC = () => {
       }
     };
     fetchHotels();
+  };
+
+  const handleDeleteHotel = async (id: string) => {
+    try {
+      const hotel = hotels.find(h => h.id_hotel === id);
+      const hotelName = hotel?.nombre_proveedor || 'este hotel';
+      
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        html: `
+          <div class="text-center">
+            <div class="mb-4">
+              <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3m-4 0h14" />
+                </svg>
+              </div>
+            </div>
+            <p class="text-gray-600 mb-2">Vas a eliminar el hotel:</p>
+            <p class="font-semibold text-gray-900 text-lg">${hotelName}</p>
+            <p class="text-sm text-gray-500 mt-2">Esta acción no se puede deshacer</p>
+          </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        customClass: {
+          popup: 'rounded-xl shadow-2xl',
+          title: 'text-xl font-bold text-gray-900',
+          confirmButton: 'px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg',
+          cancelButton: 'px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg',
+        },
+        buttonsStyling: false,
+        focusConfirm: false,
+        focusCancel: true
+      });
+
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      // Proceder con la eliminación
+      console.log('Eliminando hotel con ID:', id);
+      await hotelService.deleteHotel(id);
+      
+      // Recargar la lista después de eliminar
+      const data = await hotelService.getHotels(1, 300);
+      setHotels(data);
+      setFiltered(data);
+      
+      // Mostrar confirmación de éxito
+      await Swal.fire({
+        title: '¡Eliminado!',
+        text: 'El hotel ha sido eliminado exitosamente.',
+        icon: 'success',
+        confirmButtonColor: '#10b981',
+        confirmButtonText: 'Entendido',
+        customClass: {
+          popup: 'rounded-xl shadow-2xl',
+          title: 'text-xl font-bold text-gray-900',
+          confirmButton: 'px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg',
+        },
+        buttonsStyling: false,
+        timer: 2000,
+        timerProgressBar: true
+      });
+      
+    } catch (error) {
+      console.error('Error eliminando hotel:', error);
+      
+      await Swal.fire({
+        title: 'Error',
+        text: 'No se pudo eliminar el hotel. Por favor intenta nuevamente.',
+        icon: 'error',
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'Entendido',
+        customClass: {
+          popup: 'rounded-xl shadow-2xl',
+          title: 'text-xl font-bold text-gray-900',
+          confirmButton: 'px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg',
+        },
+        buttonsStyling: false
+      });
+    }
   };
 
   // Filtrar en memoria (barra de búsqueda global)
@@ -177,6 +266,7 @@ export const HotelsSection: React.FC = () => {
           hotels={filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
           onView={handleViewHotel}
           onEdit={handleEditHotel}
+          onDelete={handleDeleteHotel}
         />
       )}
 
