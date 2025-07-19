@@ -74,6 +74,18 @@ class HotelService {
     }
     return response.json();
   }
+
+  async createHotel(data: { proveedor: ProveedorHotel; hotel: HotelInfo }) {
+    const response = await fetch(`${API_BASE_URL}/hoteles/crear/`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}`);
+    }
+    return response.json();
+  }
 }
 
 export const hotelService = new HotelService();

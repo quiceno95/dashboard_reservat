@@ -4,6 +4,7 @@ import { HotelUnificado } from '../../types/hotel';
 import { HotelTable } from './HotelTable';
 import { HotelDetailModal } from './HotelDetailModal';
 import { EditHotelModal } from './EditHotelModal';
+import { CreateHotelModal } from './CreateHotelModal';
 import { Download, Plus, Hotel, CheckCircle, LayoutList, Search, X } from 'lucide-react';
 import Swal from 'sweetalert2';
 
@@ -18,6 +19,8 @@ export const HotelsSection: React.FC = () => {
   const [detailOpen, setDetailOpen] = useState(false);
   const [editHotelId, setEditHotelId] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
 
   useEffect(() => {
     const fetchHotels = async () => {
@@ -150,6 +153,58 @@ export const HotelsSection: React.FC = () => {
     }
   };
 
+  const handleCreateHotel = async (payload: any) => {
+    try {
+      setCreateLoading(true);
+      console.log('Creando hotel con payload:', payload);
+      
+      await hotelService.createHotel(payload);
+      
+      // Recargar la lista después de crear
+      const data = await hotelService.getHotels(1, 300);
+      setHotels(data);
+      setFiltered(data);
+      
+      setCreateOpen(false);
+      
+      // Mostrar confirmación de éxito
+      await Swal.fire({
+        title: '¡Hotel Creado!',
+        text: 'El hotel ha sido creado exitosamente.',
+        icon: 'success',
+        confirmButtonColor: '#10b981',
+        confirmButtonText: 'Entendido',
+        customClass: {
+          popup: 'rounded-xl shadow-2xl',
+          title: 'text-xl font-bold text-gray-900',
+          confirmButton: 'px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg',
+        },
+        buttonsStyling: false,
+        timer: 2000,
+        timerProgressBar: true
+      });
+      
+    } catch (error) {
+      console.error('Error creando hotel:', error);
+      
+      await Swal.fire({
+        title: 'Error',
+        text: 'No se pudo crear el hotel. Por favor verifica los datos e intenta nuevamente.',
+        icon: 'error',
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'Entendido',
+        customClass: {
+          popup: 'rounded-xl shadow-2xl',
+          title: 'text-xl font-bold text-gray-900',
+          confirmButton: 'px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg',
+        },
+        buttonsStyling: false
+      });
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
   // Filtrar en memoria (barra de búsqueda global)
   useEffect(() => {
     const term = search.toLowerCase();
@@ -179,7 +234,10 @@ export const HotelsSection: React.FC = () => {
             <Download className="h-5 w-5" />
             <span>Exportar Hoteles</span>
           </button>
-          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+          <button 
+            onClick={() => setCreateOpen(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
             <Plus className="h-5 w-5" />
             <span>Crear Hotel</span>
           </button>
@@ -333,6 +391,13 @@ export const HotelsSection: React.FC = () => {
           onSuccess={handleEditSuccess}
         />
       )}
+
+      <CreateHotelModal
+        isOpen={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onSave={handleCreateHotel}
+        loading={createLoading}
+      />
 
       {/* Gráficas sugeridas (placeholders) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
