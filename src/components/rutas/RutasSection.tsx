@@ -20,7 +20,6 @@ const RutasSection: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
 
   // Estados para estadísticas y gráficos
   const [stats, setStats] = useState<RutaStatsType>({
@@ -132,7 +131,6 @@ const RutasSection: React.FC = () => {
   // Filtrado local para búsqueda
   useEffect(() => {
     if (searchTerm) {
-      setIsSearching(true);
       const filtered = rutas.filter(ruta =>
         ruta.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         ruta.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -144,10 +142,9 @@ const RutasSection: React.FC = () => {
       setTotalItems(filtered.length);
       setTotalPages(Math.ceil(filtered.length / pageSize));
     } else {
-      setIsSearching(false);
       setFilteredRutas(rutas);
-      // Restaurar valores de paginación de la API
-      loadRutas(currentPage, pageSize);
+      // NO llamar loadRutas aquí para evitar bucle infinito
+      // Los valores de paginación se restaurarán cuando se carguen nuevos datos
     }
   }, [searchTerm, rutas, pageSize]);
 
@@ -157,6 +154,13 @@ const RutasSection: React.FC = () => {
     loadStats();
     loadChartData();
   }, []);
+
+  // Cargar rutas cuando cambie la página o el tamaño de página (solo si no hay búsqueda activa)
+  useEffect(() => {
+    if (!searchTerm) {
+      loadRutas(currentPage, pageSize);
+    }
+  }, [currentPage, pageSize]);
 
   // Handlers
   const handlePageChange = (page: number) => {
