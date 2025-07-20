@@ -220,9 +220,21 @@ export const HotelsSection: React.FC = () => {
         timerProgressBar: true
       });
 
-      // Obtener todos los hoteles
-      const data = await hotelService.getHotels(1, 1000);
-      const hotelesData: HotelUnificado[] = Array.isArray(data) ? data : [];
+      // Obtener todos los hoteles directamente de la API
+      const API_BASE_URL = 'https://back-services.api-reservat.com';
+      const response = await fetch(`${API_BASE_URL}/api/v1/hoteles/listar/?page=1&size=1000`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}`);
+      }
+      
+      const apiData = await response.json();
+      const hotelesData = apiData.data || [];
 
       if (!hotelesData.length) {
         await Swal.fire({
@@ -241,28 +253,52 @@ export const HotelsSection: React.FC = () => {
         return;
       }
 
-      // Convertir a formato plano para la hoja de Excel
-      const rows = hotelesData.map(hotel => ({
-        'Nombre Hotel': hotel.nombre_proveedor,
-        'Ciudad': hotel.ciudad,
-        'País': hotel.pais,
-        'Email': hotel.email || '',
-        'Teléfono': hotel.telefono || '',
-        'Dirección': hotel.direccion || '',
-        'Sitio Web': hotel.sitio_web || '',
-        'Estrellas': hotel.estrellas,
-        'Habitaciones': hotel.numero_habitaciones,
-        'Tipo Documento': hotel.tipo_documento || '',
-        'Número Documento': hotel.numero_documento || '',
-        'Servicios': hotel.servicios_incluidos || '',
-        'Check-in': hotel.check_in || '',
-        'Check-out': hotel.check_out || '',
-        'Recepción 24h': hotel.recepcion_24_horas ? 'Sí' : 'No',
-        'Piscina': hotel.piscina ? 'Sí' : 'No',
-        'Verificado': hotel.verificado ? 'Sí' : 'No',
-        'Ubicación': hotel.ubicacion || '',
-        'Rating': hotel.rating_promedio || 0,
-        'Descripción': hotel.descripcion || ''
+      // Convertir a formato plano para la hoja de Excel con TODOS los campos
+      const rows = hotelesData.map((item: any) => ({
+        // Información del Proveedor
+        'ID Proveedor': item.proveedor.id_proveedor,
+        'Tipo': item.proveedor.tipo,
+        'Nombre Hotel': item.proveedor.nombre,
+        'Descripción': item.proveedor.descripcion || '',
+        'Email': item.proveedor.email,
+        'Teléfono': item.proveedor.telefono,
+        'Dirección': item.proveedor.direccion,
+        'Ciudad': item.proveedor.ciudad,
+        'País': item.proveedor.pais,
+        'Sitio Web': item.proveedor.sitio_web || '',
+        'Rating Promedio': item.proveedor.rating_promedio,
+        'Verificado': item.proveedor.verificado ? 'Sí' : 'No',
+        'Fecha Registro': item.proveedor.fecha_registro,
+        'Ubicación': item.proveedor.ubicacion || '',
+        'Redes Sociales': item.proveedor.redes_sociales || '',
+        'Relevancia': item.proveedor.relevancia,
+        'Usuario Creador': item.proveedor.usuario_creador,
+        'Tipo Documento': item.proveedor.tipo_documento,
+        'Número Documento': item.proveedor.numero_documento,
+        'Activo': item.proveedor.activo ? 'Sí' : 'No',
+        
+        // Información del Hotel
+        'ID Hotel': item.hotel.id_hotel,
+        'Estrellas': item.hotel.estrellas,
+        'Número Habitaciones': item.hotel.numero_habitaciones,
+        'Servicios Incluidos': item.hotel.servicios_incluidos || '',
+        'Check-in': item.hotel.check_in,
+        'Check-out': item.hotel.check_out,
+        'Admite Mascotas': item.hotel.admite_mascotas ? 'Sí' : 'No',
+        'Tiene Estacionamiento': item.hotel.tiene_estacionamiento ? 'Sí' : 'No',
+        'Tipo Habitación': item.hotel.tipo_habitacion,
+        'Precio Base': item.hotel.precio_ascendente,
+        'Servicio Restaurante': item.hotel.servicio_restaurante ? 'Sí' : 'No',
+        'Recepción 24h': item.hotel.recepcion_24_horas ? 'Sí' : 'No',
+        'Bar': item.hotel.bar ? 'Sí' : 'No',
+        'Room Service': item.hotel.room_service ? 'Sí' : 'No',
+        'Ascensor': item.hotel.asensor ? 'Sí' : 'No',
+        'Rampa Discapacitados': item.hotel.rampa_discapacitado ? 'Sí' : 'No',
+        'Pet Friendly': item.hotel.pet_friendly ? 'Sí' : 'No',
+        'Auditorio': item.hotel.auditorio ? 'Sí' : 'No',
+        'Parqueadero': item.hotel.parqueadero ? 'Sí' : 'No',
+        'Piscina': item.hotel.piscina ? 'Sí' : 'No',
+        'Planta Energía': item.hotel.planta_energia ? 'Sí' : 'No'
       }));
 
       // Crear hoja de Excel
@@ -270,22 +306,46 @@ export const HotelsSection: React.FC = () => {
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Hoteles');
 
-      // Generar fecha para el nombre del archivo
+      // Generar fecha y nombre del archivo con extensión explícita
       const fecha = new Date().toISOString().split('T')[0];
+      const timestamp = new Date().getTime();
+      const fileName = `hoteles_${fecha}_${timestamp}.xlsx`;
       
       // Generar ArrayBuffer y descargar manualmente para asegurar extensión
       const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([wbout], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',
       });
+      
+      // Método mejorado para asegurar la descarga con extensión
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
+      
+      // Configurar el enlace de descarga
       link.href = url;
-      link.download = `hoteles_${fecha}.xlsx`;
+      link.download = fileName;
+      link.style.display = 'none';
+      link.target = '_blank';
+      
+      // Forzar atributos para asegurar descarga correcta
+      link.setAttribute('download', fileName);
+      link.setAttribute('href', url);
+      
+      // Agregar al DOM, hacer click y limpiar
       document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      
+      // Usar setTimeout para asegurar que el DOM se actualice
+      setTimeout(() => {
+        link.click();
+        
+        // Limpiar después de la descarga
+        setTimeout(() => {
+          if (document.body.contains(link)) {
+            document.body.removeChild(link);
+          }
+          URL.revokeObjectURL(url);
+        }, 200);
+      }, 50);
       
       // Mostrar confirmación de éxito
       await Swal.fire({
