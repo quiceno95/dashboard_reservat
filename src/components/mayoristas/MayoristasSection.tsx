@@ -73,16 +73,17 @@ const MayoristasSection: React.FC = () => {
 
     } else {
       setFilteredMayoristas(mayoristas);
-      setTotalItems(mayoristas.length);
-      setTotalPages(Math.ceil(mayoristas.length / pageSize));
+      // No sobrescribir totalItems y totalPages cuando no hay búsqueda
+      // Estos valores ya vienen correctos de la API
     }
   }, [searchTerm, mayoristas, pageSize]);
 
   const loadMayoristas = async () => {
     try {
       setLoading(true);
-      const response = await mayoristaService.getMayoristas(currentPage, pageSize);
+      const response = await mayoristaService.getMayoristas(currentPage - 1, pageSize);
       setMayoristas(response.mayoristas);
+      setFilteredMayoristas(response.mayoristas);
       setTotalItems(response.total);
       setTotalPages(response.totalPages);
     } catch (error) {
@@ -271,12 +272,14 @@ const MayoristasSection: React.FC = () => {
   };
 
   const getCurrentPageMayoristas = () => {
+    // Si hay término de búsqueda, usar paginación local
     if (searchTerm.trim()) {
       const startIndex = (currentPage - 1) * pageSize;
       const endIndex = startIndex + pageSize;
       return filteredMayoristas.slice(startIndex, endIndex);
     }
-    return filteredMayoristas;
+    // Si no hay búsqueda, los datos ya vienen paginados de la API
+    return mayoristas;
   };
 
   return (

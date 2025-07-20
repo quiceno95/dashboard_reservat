@@ -1,36 +1,18 @@
 import React from 'react';
-import { Search, X, Eye, Edit, Trash2, MapPin, Clock, Star, Users, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
-import { RestauranteData } from '../../types/restaurante';
+import { Search, X, Eye, Edit, Trash2, MapPin, Clock, ArrowRight, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { RutaTableProps } from '../../types/ruta';
 
-interface RestauranteTableProps {
-  restaurantes: RestauranteData[];
-  loading: boolean;
-  currentPage: number;
-  totalPages: number;
-  pageSize: number;
-  totalItems: number;
-  searchTerm: string;
-  isSearching: boolean;
-  onSearch: (term: string) => void;
-  onPageChange: (page: number) => void;
-  onPageSizeChange: (size: number) => void;
-  onViewDetails: (id: string) => void;
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
-}
-
-const RestauranteTable: React.FC<RestauranteTableProps> = ({
-  restaurantes,
+const RutaTable: React.FC<RutaTableProps> = ({
+  rutas,
   loading,
   currentPage,
-  totalPages,
   pageSize,
+  totalPages,
   totalItems,
   searchTerm,
-  isSearching,
-  onSearch,
   onPageChange,
   onPageSizeChange,
+  onSearch,
   onViewDetails,
   onEdit,
   onDelete
@@ -71,8 +53,6 @@ const RestauranteTable: React.FC<RestauranteTableProps> = ({
     return pages;
   };
 
-
-
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg">
@@ -97,7 +77,7 @@ const RestauranteTable: React.FC<RestauranteTableProps> = ({
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900">
-              Lista de Restaurantes ({totalItems} total)
+              Lista de Rutas ({totalItems} total)
             </h3>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-700">Mostrar</span>
@@ -112,7 +92,7 @@ const RestauranteTable: React.FC<RestauranteTableProps> = ({
                 <option value={50}>50</option>
               </select>
               <span className="text-sm text-gray-700">
-                de {totalItems} restaurantes
+                de {totalItems} rutas
               </span>
             </div>
           </div>
@@ -127,7 +107,7 @@ const RestauranteTable: React.FC<RestauranteTableProps> = ({
             <input
               type="text"
               className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Buscar restaurantes..."
+              placeholder="Buscar rutas por nombre, origen, destino..."
               value={searchTerm}
               onChange={(e) => onSearch(e.target.value)}
             />
@@ -150,13 +130,10 @@ const RestauranteTable: React.FC<RestauranteTableProps> = ({
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Proveedor
+                  Ruta
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ubicación
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Restaurante
+                  Origen → Destino
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Detalles
@@ -165,7 +142,10 @@ const RestauranteTable: React.FC<RestauranteTableProps> = ({
                   Estado
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Registro
+                  Precio
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Características
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
@@ -173,124 +153,108 @@ const RestauranteTable: React.FC<RestauranteTableProps> = ({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {isSearching ? (
-                <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center">
-                    <div className="animate-pulse">Buscando...</div>
-                  </td>
-                </tr>
-              ) : restaurantes.length === 0 ? (
+              {rutas.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                    {searchTerm ? `No se encontraron resultados para "${searchTerm}"` : 'No hay restaurantes registrados'}
+                    {searchTerm ? `No se encontraron resultados para "${searchTerm}"` : 'No hay rutas registradas'}
                   </td>
                 </tr>
               ) : (
-                restaurantes.map((restaurante) => (
-                  <tr key={restaurante.id_restaurante} className="hover:bg-gray-50">
-                    {/* Columna 1: Proveedor (como en Experiencias) */}
+                rutas.map((ruta) => (
+                  <tr key={ruta.id} className="hover:bg-gray-50">
+                    {/* Columna 1: Ruta (nombre + descripción) */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-gradient-to-r from-orange-400 to-red-500 flex items-center justify-center">
+                          <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center">
                             <span className="text-sm font-medium text-white">
-                              {restaurante.nombre.charAt(0).toUpperCase()}
+                              {ruta.nombre.charAt(0).toUpperCase()}
                             </span>
                           </div>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {restaurante.nombre}
+                            {ruta.nombre}
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {restaurante.email}
-                          </div>
-                          <div className="flex items-center mt-1">
-                            <Star className="h-3 w-3 text-yellow-400 mr-1" />
-                            <span className="text-xs text-gray-600">
-                              {restaurante.rating_promedio.toFixed(1)}
-                            </span>
+                          <div className="text-sm text-gray-500 truncate max-w-xs">
+                            {ruta.descripcion}
                           </div>
                         </div>
                       </div>
                     </td>
-                    {/* Columna 2: Ubicación */}
+                    
+                    {/* Columna 2: Origen → Destino */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center text-sm text-gray-900">
                         <MapPin className="h-4 w-4 text-gray-400 mr-1" />
-                        <div>
-                          <div>{restaurante.ciudad}</div>
-                          <div className="text-xs text-gray-500">{restaurante.pais}</div>
+                        <div className="flex items-center">
+                          <span>{ruta.origen}</span>
+                          <ArrowRight className="h-3 w-3 mx-2 text-gray-400" />
+                          <span>{ruta.destino}</span>
                         </div>
                       </div>
                     </td>
-                    {/* Columna 3: Restaurante (tipo cocina + tipo comida) */}
-                    <td className="px-6 py-4">
-                      <div className="space-y-1">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                          {restaurante.tipo_cocina}
-                        </span>
-                        {restaurante.tipo_comida && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {restaurante.tipo_comida}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    {/* Columna 4: Detalles (horario + capacidad) */}
+                    
+                    {/* Columna 3: Detalles (duración + puntos de interés) */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div className="space-y-1">
                         <div className="flex items-center">
                           <Clock className="h-3 w-3 mr-1" />
-                          {restaurante.horario_apertura} - {restaurante.horario_cierre}
+                          {ruta.duracion_estimada} min
                         </div>
                         <div className="flex items-center">
                           <Users className="h-3 w-3 mr-1" />
-                          {restaurante.capacidad} personas
+                          <span className="truncate max-w-xs">{ruta.puntos_interes}</span>
                         </div>
                       </div>
                     </td>
-                    {/* Columna 5: Estado */}
+                    
+                    {/* Columna 4: Estado */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          restaurante.verificado
+                          ruta.activo
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
                         }`}
                       >
-                        {restaurante.verificado ? 'Verificado' : 'No verificado'}
+                        {ruta.activo ? 'Activa' : 'Inactiva'}
                       </span>
                     </td>
-                    {/* Columna 6: Registro (fecha) */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        {restaurante.fecha_registro 
-                          ? new Date(restaurante.fecha_registro).toLocaleDateString('es-ES')
-                          : 'N/A'
-                        }
-                      </div>
+                    
+                    {/* Columna 5: Precio */}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      ${ruta.precio}
                     </td>
+                    
+                    {/* Columna 6: Características (recomendada) */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {ruta.recomendada && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Recomendada
+                        </span>
+                      )}
+                    </td>
+                    
                     {/* Columna 7: Acciones */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => onViewDetails(restaurante.id_restaurante)}
+                          onClick={() => onViewDetails(ruta.id)}
                           className="text-indigo-600 hover:text-indigo-900 p-1 rounded-full hover:bg-indigo-100"
                           title="Ver detalles"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => onEdit(restaurante.id_restaurante)}
+                          onClick={() => onEdit(ruta.id)}
                           className="text-yellow-600 hover:text-yellow-900 p-1 rounded-full hover:bg-yellow-100"
                           title="Editar"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => onDelete(restaurante.id_restaurante)}
+                          onClick={() => onDelete(ruta.id)}
                           className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-100"
                           title="Eliminar"
                         >
@@ -307,7 +271,7 @@ const RestauranteTable: React.FC<RestauranteTableProps> = ({
 
         {/* Navegación de páginas */}
         {totalPages > 1 && (
-          <div className="mt-6 flex items-center justify-end">
+          <div className="mt-6 flex items-center justify-center">
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => onPageChange(currentPage - 1)}
@@ -351,4 +315,4 @@ const RestauranteTable: React.FC<RestauranteTableProps> = ({
   );
 };
 
-export default RestauranteTable;
+export default RutaTable;

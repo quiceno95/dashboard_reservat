@@ -7,6 +7,8 @@ import { ExperiencesSection } from './experiences/ExperiencesSection';
 import { HotelsSection } from './hotels/HotelsSection';
 import MayoristasSection from './mayoristas/MayoristasSection';
 import RestaurantesSection from './restaurantes/RestaurantesSection';
+import RutasSection from './rutas/RutasSection';
+import TransportesSection from './transportes/TransportesSection';
 
 interface DashboardProps {
   user: UserData;
@@ -41,6 +43,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         return <MayoristasSection />;
       case 'restaurantes':
         return <RestaurantesSection />;
+      case 'rutas':
+        return <RutasSection />;
+      case 'transportes':
+        return <TransportesSection />;
       default:
         return <div className="text-center py-12 text-gray-500">Sección en desarrollo</div>;
     }

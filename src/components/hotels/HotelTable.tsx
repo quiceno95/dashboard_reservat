@@ -392,12 +392,12 @@ export const HotelTable: React.FC<HotelTableProps> = ({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col space-y-3">
             <div className="text-sm text-gray-600">
               Mostrando {((currentPage - 1) * pageSize) + 1} a {Math.min(currentPage * pageSize, totalHotels)} de {totalHotels} hoteles
             </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center justify-end space-x-2">
               <button
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}

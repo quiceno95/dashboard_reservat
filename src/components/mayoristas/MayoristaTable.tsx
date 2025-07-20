@@ -112,38 +112,54 @@ const MayoristaTable: React.FC<MayoristaTableProps> = ({
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="p-6">
+        {/* Header con título y controles */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium text-gray-900">
+              Lista de Mayoristas ({totalItems} total)
+            </h3>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-700">Mostrar</span>
+              <select
+                value={pageSize}
+                onChange={(e) => onPageSizeChange(Number(e.target.value))}
+                className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+              <span className="text-sm text-gray-700">
+                de {totalItems} mayoristas
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Barra de búsqueda */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <div className="mb-4">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
             <input
               type="text"
+              className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Buscar mayoristas..."
               value={localSearchTerm}
               onChange={(e) => setLocalSearchTerm(e.target.value)}
-              className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             {localSearchTerm && (
-              <button
-                onClick={() => setLocalSearchTerm('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                <button
+                  onClick={() => setLocalSearchTerm('')}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             )}
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600">Mostrar:</span>
-            <select
-              value={pageSize}
-              onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
           </div>
         </div>
 
@@ -275,7 +291,7 @@ const MayoristaTable: React.FC<MayoristaTableProps> = ({
         </div>
 
         {/* Paginación */}
-        {totalPages > 1 && (
+        {totalItems > 0 && (
           <div className="flex items-center justify-between mt-6">
             <div className="text-sm text-gray-700">
               Mostrando {((currentPage - 1) * pageSize) + 1} a {Math.min(currentPage * pageSize, totalItems)} de {totalItems} mayoristas
