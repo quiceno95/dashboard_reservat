@@ -5,16 +5,18 @@ import { HotelTable } from './HotelTable';
 import { HotelDetailModal } from './HotelDetailModal';
 import { EditHotelModal } from './EditHotelModal';
 import { CreateHotelModal } from './CreateHotelModal';
-import { Download, Plus, Hotel, CheckCircle, LayoutList, Search, X } from 'lucide-react';
+import { HotelStarsChart } from './HotelStarsChart';
+import { HotelServicesChart } from './HotelServicesChart';
+import { Download, Plus, Hotel, CheckCircle, LayoutList } from 'lucide-react';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 
 export const HotelsSection: React.FC = () => {
   const [hotels, setHotels] = useState<HotelUnificado[]>([]);
   const [filtered, setFiltered] = useState<HotelUnificado[]>([]);
-  const [search, setSearch] = useState('');
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(5);
   const [loading, setLoading] = useState(false);
   const [selectedHotelId, setSelectedHotelId] = useState<string | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -22,6 +24,8 @@ export const HotelsSection: React.FC = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     const fetchHotels = async () => {
@@ -47,6 +51,42 @@ export const HotelsSection: React.FC = () => {
   const handleEditHotel = (id: string) => {
     setEditHotelId(id);
     setEditOpen(true);
+  };
+
+  const handleSearchChange = (term: string) => {
+    setSearchTerm(term);
+    setIsSearching(true);
+    setCurrentPage(1);
+    
+    if (term.trim() === '') {
+      setFiltered(hotels);
+      setIsSearching(false);
+    } else {
+      const filtered = hotels.filter(hotel => 
+        hotel.nombre_proveedor.toLowerCase().includes(term.toLowerCase()) ||
+        hotel.ciudad.toLowerCase().includes(term.toLowerCase()) ||
+        hotel.pais.toLowerCase().includes(term.toLowerCase()) ||
+        (hotel.email && hotel.email.toLowerCase().includes(term.toLowerCase()))
+      );
+      setFiltered(filtered);
+      setIsSearching(false);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    setIsSearching(false);
+    setFiltered(hotels);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1);
   };
 
   const handleEditSuccess = () => {
@@ -383,15 +423,10 @@ export const HotelsSection: React.FC = () => {
     }
   };
 
-  // Filtrar en memoria (barra de búsqueda global)
+  // Inicializar filtered con todos los hoteles
   useEffect(() => {
-    const term = search.toLowerCase();
-    const res = hotels.filter(h =>
-      `${h.nombre_proveedor} ${h.ciudad} ${h.pais}`.toLowerCase().includes(term)
-    );
-    setFiltered(res);
-    setCurrentPage(1);
-  }, [search, hotels]);
+    setFiltered(hotels);
+  }, [hotels]);
 
   // Estadísticas (pueden ser estáticas o simples conteos)
   const total = hotels.length;
@@ -469,91 +504,24 @@ export const HotelsSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Lista de Hoteles en tarjeta */}
-      <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
-      {/* Barra de búsqueda y título */}
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">Lista de Hoteles ({total} total)</h3>
-      <div className="relative mb-4">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className={`h-5 w-5 ${search ? 'text-blue-500' : 'text-gray-400'}`} />
-        </div>
-        <input
-          type="text"
-          placeholder="Buscar hoteles por proveedor, ciudad, país..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className={`block w-full pl-10 pr-12 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-            search ? 'border-blue-300 bg-blue-50' : 'border-gray-300'
-          }`}
-        />
-        {search && (
-          <button
-            onClick={() => setSearch('')}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-            title="Limpiar búsqueda"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        )}
-      </div>
-
       {/* Tabla */}
-      {loading ? (
-        <p>Cargando hoteles...</p>
-      ) : (
-        <HotelTable
-          hotels={filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
-          onView={handleViewHotel}
-          onEdit={handleEditHotel}
-          onDelete={handleDeleteHotel}
-        />
-      )}
-
-      {/* Paginación */}
-      {!loading && filtered.length > pageSize && (
-        <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <span>Mostrar:</span>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
-            <span>por página</span>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1 border rounded-lg text-sm disabled:opacity-50"
-            >
-              Anterior
-            </button>
-            <span className="text-sm text-gray-600">
-              Página {currentPage} de {Math.ceil(filtered.length / pageSize)}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(Math.ceil(filtered.length / pageSize), p + 1))}
-              disabled={currentPage === Math.ceil(filtered.length / pageSize)}
-              className="px-3 py-1 border rounded-lg text-sm disabled:opacity-50"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Fin tarjeta lista */}
-      </div>
+      <HotelTable
+        hotels={filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
+        searchTerm={searchTerm}
+        isSearching={isSearching}
+        onSearchChange={handleSearchChange}
+        onClearSearch={handleClearSearch}
+        loading={loading}
+        currentPage={currentPage}
+        totalPages={Math.ceil(filtered.length / pageSize)}
+        totalHotels={filtered.length}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        onView={handleViewHotel}
+        onEdit={handleEditHotel}
+        onDelete={handleDeleteHotel}
+      />
 
       {/* Modal detalle */}
       {selectedHotelId && (
@@ -580,14 +548,10 @@ export const HotelsSection: React.FC = () => {
         loading={createLoading}
       />
 
-      {/* Gráficas sugeridas (placeholders) */}
+      {/* Gráficas de hoteles */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-        <div className="h-64 flex items-center justify-center border border-dashed rounded-lg text-gray-400">
-          Aquí irá el gráfico de barras de distribución de estrellas
-        </div>
-        <div className="h-64 flex items-center justify-center border border-dashed rounded-lg text-gray-400">
-          Aquí irá el gráfico donut de hoteles con/sin piscina
-        </div>
+        <HotelStarsChart hotels={hotels} />
+        <HotelServicesChart hotels={hotels} />
       </div>
     </div>
   );
