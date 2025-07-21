@@ -9,7 +9,7 @@ import {
 } from '../types/servicio';
 import * as XLSX from 'xlsx';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = 'https://back-services.api-reservat.com';
 
 // Función para obtener el token de autenticación
 const getAuthToken = (): string => {
