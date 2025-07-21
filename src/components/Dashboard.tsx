@@ -10,6 +10,9 @@ import RestaurantesSection from './restaurantes/RestaurantesSection';
 import RutasSection from './rutas/RutasSection';
 import TransportesSection from './transportes/TransportesSection';
 import ViajesSection from './viajes/ViajesSection';
+import RestriccionesSection from './restricciones/RestriccionesSection';
+import FotosSection from './fotos/FotosSection';
+import ServiciosSection from './servicios/ServiciosSection';
 
 interface DashboardProps {
   user: UserData;
@@ -36,6 +39,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     switch (activeSection) {
       case 'usuarios':
         return <UsersSection />;
+      case 'servicios':
+        return <ServiciosSection />;
       case 'experiencias':
         return <ExperiencesSection />;
       case 'hoteles':
@@ -50,6 +55,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         return <TransportesSection />;
       case 'viajes':
         return <ViajesSection />;
+      case 'fechas-bloqueadas':
+        return <RestriccionesSection />;
+      case 'fotos':
+        return <FotosSection />;
       default:
         return <div className="text-center py-12 text-gray-500">Sección en desarrollo</div>;
     }
