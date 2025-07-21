@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { X, Shield, Plus } from 'lucide-react';
 import { RestriccionModalProps } from '../../types/restriccion';
 import { restriccionService } from '../../services/restriccionService';
@@ -131,9 +132,9 @@ const CreateRestriccionModal: React.FC<RestriccionModalProps> = ({ isOpen, onClo
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+  const modalContent = (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+      <div className="relative mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center pb-3 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900 flex items-center">
             <Shield className="h-5 w-5 mr-2 text-blue-500" />
@@ -297,6 +298,8 @@ const CreateRestriccionModal: React.FC<RestriccionModalProps> = ({ isOpen, onClo
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default CreateRestriccionModal;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Plus } from 'lucide-react';
+import { Download, Plus, Store } from 'lucide-react';
 import { MayoristaData, MayoristaStats as MayoristaStatsType, MayoristaChartData } from '../../types/mayorista';
 import { mayoristaService } from '../../services/mayoristaService';
 import MayoristaTable from './MayoristaTable';
@@ -287,20 +287,23 @@ const MayoristasSection: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Mayoristas</h1>
+          <div className="flex items-center space-x-3">
+            <Store className="h-8 w-8 text-blue-600" />
+            <h1 className="text-3xl font-bold text-gray-900">Mayoristas</h1>
+          </div>
           <p className="text-gray-600 mt-1">Gestiona los mayoristas del sistema</p>
         </div>
         <div className="flex space-x-4">
           <button
             onClick={handleExportMayoristas}
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Download className="w-4 h-4 mr-2" />
             Exportar Mayoristas
           </button>
           <button
             onClick={() => setCreateOpen(true)}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
             <Plus className="w-4 h-4 mr-2" />
             Crear Mayorista

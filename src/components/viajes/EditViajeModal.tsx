@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { X, Calendar, Users, DollarSign, User, MapPin, Route, Truck } from 'lucide-react';
 import { EditViajeModalProps, ActualizarViaje, ESTADOS_VIAJE } from '../../types/viaje';
 
@@ -143,9 +144,9 @@ const EditViajeModal: React.FC<EditViajeModalProps> = ({ isOpen, onClose, viaje,
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 shadow-lg rounded-md bg-white">
+  const modalContent = (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+      <div className="relative mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-gray-900">Editar Viaje</h3>
           <button
@@ -388,6 +389,8 @@ const EditViajeModal: React.FC<EditViajeModalProps> = ({ isOpen, onClose, viaje,
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default EditViajeModal;

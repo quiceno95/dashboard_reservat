@@ -5,7 +5,7 @@ import { ExperienceTable } from './ExperienceTable';
 import { ExperienceCharts } from './ExperienceCharts';
 import { ExperienciaCompleta } from '../../types/experience';
 import { experienceService } from '../../services/experienceService';
-import { AlertCircle, CheckCircle, Plus, Download } from 'lucide-react';
+import { AlertCircle, CheckCircle, Plus, Download, Star } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export const ExperiencesSection: React.FC = () => {
@@ -346,7 +346,10 @@ export const ExperiencesSection: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Experiencias</h1>
+          <div className="flex items-center space-x-3">
+            <Star className="h-8 w-8 text-blue-600" />
+            <h1 className="text-3xl font-bold text-gray-900">Gestión de Experiencias</h1>
+          </div>
           <p className="text-gray-600 mt-2">
             Administra todas las experiencias y tours del sistema
           </p>
@@ -354,14 +357,14 @@ export const ExperiencesSection: React.FC = () => {
         <div className="flex items-center space-x-3">
           <button
             onClick={handleExportExperiences}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
             <Download className="h-5 w-5" />
             <span>Exportar Experiencias</span>
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
           >
             <Plus className="h-5 w-5" />
             <span>Crear Experiencia</span>

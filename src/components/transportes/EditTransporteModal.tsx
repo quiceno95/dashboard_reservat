@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { X, Car, Save } from 'lucide-react';
 import { TransporteModalProps } from '../../types/transporte';
 import { transporteService } from '../../services/transporteService';
@@ -175,9 +176,9 @@ const EditTransporteModal: React.FC<TransporteModalProps> = ({ isOpen, onClose, 
 
   if (!isOpen || !transporte) return null;
 
-  return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white">
+  const modalContent = (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+      <div className="relative mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-gray-200">
           <div className="flex items-center">
@@ -384,6 +385,8 @@ const EditTransporteModal: React.FC<TransporteModalProps> = ({ isOpen, onClose, 
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default EditTransporteModal;

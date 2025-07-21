@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Download } from 'lucide-react';
+import { Plus, Download, Shield } from 'lucide-react';
 import { RestriccionData, RestriccionStatsData, RestriccionChartData } from '../../types/restriccion';
 import { restriccionService } from '../../services/restriccionService';
 import RestriccionTable from './RestriccionTable';
@@ -226,20 +226,23 @@ const RestriccionesSection: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestión de Restricciones</h1>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+            <Shield className="h-6 w-6 mr-2 text-red-600" />
+            Gestión de Restricciones
+          </h1>
           <p className="text-gray-600">Administra las fechas bloqueadas del sistema</p>
         </div>
         <div className="flex space-x-3">
           <button
             onClick={handleExport}
-            className="flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <Download className="h-4 w-4 mr-2" />
             Exportar Restricciones
           </button>
           <button
             onClick={() => setCreateModalOpen(true)}
-            className="flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           >
             <Plus className="h-4 w-4 mr-2" />
             Crear Restricción

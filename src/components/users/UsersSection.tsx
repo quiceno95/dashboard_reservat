@@ -5,7 +5,7 @@ import { UserCharts } from './UserCharts';
 import { CreateUserModal } from './CreateUserModal';
 import { User } from '../../types/user';
 import { userService } from '../../services/userService';
-import { AlertCircle, CheckCircle, Plus } from 'lucide-react';
+import { AlertCircle, CheckCircle, Plus, Users } from 'lucide-react';
 import { Download } from 'lucide-react';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
@@ -907,7 +907,10 @@ export const UsersSection: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Usuarios</h1>
+          <div className="flex items-center space-x-3">
+            <Users className="h-8 w-8 text-blue-600" />
+            <h1 className="text-3xl font-bold text-gray-900">Gestión de Usuarios</h1>
+          </div>
           <p className="text-gray-600 mt-2">
             Administra todos los usuarios del sistema
           </p>
@@ -916,7 +919,7 @@ export const UsersSection: React.FC = () => {
           <button
             onClick={handleExportUsers}
             disabled={exportLoading}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           >
             {exportLoading ? (
               <>
@@ -932,7 +935,7 @@ export const UsersSection: React.FC = () => {
           </button>
           <button
             onClick={() => setCreateModalOpen(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
           >
             <Plus className="h-5 w-5" />
             <span>Crear Usuario</span>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { X, Save, User, Star, MapPin, Clock, Users, Globe, Shield, Mail, Phone, ExternalLink, Calendar } from 'lucide-react';
 
 interface ExperienceEditData {
@@ -247,10 +248,10 @@ export const EditExperienceModal: React.FC<EditExperienceModalProps> = ({
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !experienceData) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  const modalContent = (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -758,4 +759,6 @@ export const EditExperienceModal: React.FC<EditExperienceModalProps> = ({
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };

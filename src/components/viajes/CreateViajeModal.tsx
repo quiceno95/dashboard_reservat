@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { X, Calendar, Users, DollarSign, User, Route, Truck } from 'lucide-react';
 import { CreateViajeModalProps, DatosViaje, ESTADOS_VIAJE } from '../../types/viaje';
 
@@ -135,24 +136,25 @@ const CreateViajeModal: React.FC<CreateViajeModalProps> = ({ isOpen, onClose, on
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 shadow-lg rounded-md bg-white">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-900">Crear Nuevo Viaje</h3>
+  const modalContent = (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+      <div className="relative mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900">Crear Nuevo Viaje</h3>
           <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
           >
             <X className="h-6 w-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="mt-4">
           {/* Fechas */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center">
-              <Calendar className="h-5 w-5 text-blue-500 mr-2" />
+          <div className="mb-6">
+            <h4 className="text-md font-medium text-gray-900 mb-3 flex items-center">
+              <Calendar className="h-4 w-4 mr-2" />
               Fechas del Viaje
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -194,9 +196,9 @@ const CreateViajeModal: React.FC<CreateViajeModalProps> = ({ isOpen, onClose, on
           </div>
 
           {/* Capacidad y Precio */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center">
-              <Users className="h-5 w-5 text-green-500 mr-2" />
+          <div className="mb-6">
+            <h4 className="text-md font-medium text-gray-900 mb-3 flex items-center">
+              <Users className="h-4 w-4 mr-2" />
               Capacidad y Precio
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -239,7 +241,7 @@ const CreateViajeModal: React.FC<CreateViajeModalProps> = ({ isOpen, onClose, on
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Precio *
+                  Precio (COP) *
                 </label>
                 <div className="relative">
                   <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
@@ -249,6 +251,7 @@ const CreateViajeModal: React.FC<CreateViajeModalProps> = ({ isOpen, onClose, on
                     value={formData.precio}
                     onChange={handleInputChange}
                     min="0"
+                    step="1000"
                     className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       errors.precio ? 'border-red-500' : 'border-gray-300'
                     }`}
@@ -261,10 +264,10 @@ const CreateViajeModal: React.FC<CreateViajeModalProps> = ({ isOpen, onClose, on
             </div>
           </div>
 
-          {/* Asignaciones */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center">
-              <User className="h-5 w-5 text-purple-500 mr-2" />
+          {/* Guía y Estado */}
+          <div className="mb-6">
+            <h4 className="text-md font-medium text-gray-900 mb-3 flex items-center">
+              <User className="h-4 w-4 mr-2" />
               Asignaciones
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -307,6 +310,15 @@ const CreateViajeModal: React.FC<CreateViajeModalProps> = ({ isOpen, onClose, on
                   <p className="text-red-500 text-xs mt-1">{errors.estado}</p>
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* IDs Técnicos */}
+          <div className="mb-6">
+            <h4 className="text-md font-medium text-gray-900 mb-3">
+              IDs Técnicos
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   ID de Ruta *
@@ -353,7 +365,7 @@ const CreateViajeModal: React.FC<CreateViajeModalProps> = ({ isOpen, onClose, on
           </div>
 
           {/* Estado Activo */}
-          <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="mb-6">
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -362,21 +374,19 @@ const CreateViajeModal: React.FC<CreateViajeModalProps> = ({ isOpen, onClose, on
                 onChange={handleInputChange}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label className="ml-2 block text-sm font-medium text-gray-700">
+              <label className="ml-2 text-sm text-gray-700">
                 Viaje activo
               </label>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Los viajes activos aparecerán en las búsquedas y estarán disponibles para reservas.
-            </p>
           </div>
 
           {/* Botones */}
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
             <button
               type="button"
-              onClick={handleClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              onClick={onClose}
+              disabled={loading}
+              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancelar
             </button>
@@ -392,6 +402,8 @@ const CreateViajeModal: React.FC<CreateViajeModalProps> = ({ isOpen, onClose, on
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default CreateViajeModal;

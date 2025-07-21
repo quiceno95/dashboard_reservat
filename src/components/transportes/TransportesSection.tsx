@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Download } from 'lucide-react';
+import { Plus, Download, Car } from 'lucide-react';
 import { TransporteData, TransporteStats as TransporteStatsType, TransporteChartData } from '../../types/transporte';
 import { transporteService } from '../../services/transporteService';
 import TransporteTable from './TransporteTable';
@@ -258,18 +258,21 @@ const TransportesSection: React.FC = () => {
     <div className="space-y-6">
       {/* Header con botones */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">Gestión de Transportes</h1>
+        <div className="flex items-center space-x-3">
+          <Car className="h-8 w-8 text-blue-600" />
+          <h1 className="text-2xl font-semibold text-gray-900">Gestión de Transportes</h1>
+        </div>
         <div className="flex space-x-3">
           <button
             onClick={handleExport}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <Download className="h-4 w-4 mr-2" />
             Exportar Transportes
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           >
             <Plus className="h-4 w-4 mr-2" />
             Crear Transporte

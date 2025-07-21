@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { X, Save, Loader } from 'lucide-react';
 import { CreateRestauranteData } from '../../types/restaurante';
 import { restauranteService } from '../../services/restauranteService';
@@ -96,7 +97,7 @@ const CreateRestauranteModal: React.FC<CreateRestauranteModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
@@ -522,6 +523,8 @@ const CreateRestauranteModal: React.FC<CreateRestauranteModalProps> = ({
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default CreateRestauranteModal;

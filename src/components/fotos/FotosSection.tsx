@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Plus, Download } from 'lucide-react';
+import { Plus, Download, Image } from 'lucide-react';
 import Swal from 'sweetalert2';
 import FotoTable from './FotoTable';
 import FotoStats from './FotoStats';
@@ -312,15 +312,17 @@ const FotosSection: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <Camera className="h-8 w-8 text-purple-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Gestión de Fotos</h1>
+        <div>
+          <div className="flex items-center space-x-3">
+            <Image className="h-8 w-8 text-blue-600" />
+            <h1 className="text-2xl font-bold text-gray-900">Gestión de Fotos</h1>
+          </div>
         </div>
         
         <div className="flex space-x-3">
           <button
             onClick={handleExportExcel}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <Download className="h-4 w-4 mr-2" />
             Exportar Fotos
@@ -328,7 +330,7 @@ const FotosSection: React.FC = () => {
           
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           >
             <Plus className="h-4 w-4 mr-2" />
             Crear Foto

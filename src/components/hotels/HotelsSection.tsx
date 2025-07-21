@@ -7,7 +7,7 @@ import { EditHotelModal } from './EditHotelModal';
 import { CreateHotelModal } from './CreateHotelModal';
 import { HotelStarsChart } from './HotelStarsChart';
 import { HotelServicesChart } from './HotelServicesChart';
-import { Download, Plus, Hotel, CheckCircle, LayoutList } from 'lucide-react';
+import { Download, Plus, Hotel, CheckCircle, LayoutList, Building } from 'lucide-react';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 
@@ -439,20 +439,23 @@ export const HotelsSection: React.FC = () => {
       {/* Encabezado y botones */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Hoteles</h1>
+          <div className="flex items-center space-x-3">
+            <Building className="h-8 w-8 text-blue-600" />
+            <h1 className="text-3xl font-bold text-gray-900">Gestión de Hoteles</h1>
+          </div>
           <p className="text-gray-600 mt-2">Administra todos los hoteles del sistema</p>
         </div>
         <div className="flex items-center space-x-3">
           <button 
             onClick={handleExportHotels}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
             <Download className="h-5 w-5" />
             <span>Exportar Hoteles</span>
           </button>
           <button 
             onClick={() => setCreateOpen(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
           >
             <Plus className="h-5 w-5" />
             <span>Crear Hotel</span>

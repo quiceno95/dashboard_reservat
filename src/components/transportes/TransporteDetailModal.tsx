@@ -1,13 +1,14 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { X, Car, User, Mail, Phone, MapPin, Globe, Star, Shield, Wifi, Users, Calendar, Fuel } from 'lucide-react';
 import { TransporteModalProps } from '../../types/transporte';
 
 const TransporteDetailModal: React.FC<TransporteModalProps> = ({ isOpen, onClose, transporte }) => {
   if (!isOpen || !transporte) return null;
 
-  return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+  const modalContent = (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+      <div className="relative mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-gray-200">
           <div className="flex items-center">
@@ -261,6 +262,8 @@ const TransporteDetailModal: React.FC<TransporteModalProps> = ({ isOpen, onClose
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default TransporteDetailModal;

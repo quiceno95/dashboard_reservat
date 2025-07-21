@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { X, Save, Loader } from 'lucide-react';
 import { RestauranteData, UpdateRestauranteData } from '../../types/restaurante';
 import { restauranteService } from '../../services/restauranteService';

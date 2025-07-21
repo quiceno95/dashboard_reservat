@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { X, Building2, User, Save } from 'lucide-react';
 import { hotelService } from '../../services/hotelService';
 import { ProveedorHotel, HotelInfo } from '../../types/hotel';
@@ -82,7 +83,7 @@ export const EditHotelModal: React.FC<Props> = ({ isOpen, onClose, hotelId, onSu
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
@@ -417,4 +418,6 @@ export const EditHotelModal: React.FC<Props> = ({ isOpen, onClose, hotelId, onSu
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
