@@ -2,7 +2,7 @@ import { User } from '../types/user';
 import { getCookie } from '../utils/auth';
 
 // Usar el proxy configurado en Vite para evitar problemas de CORS
-const API_BASE_URL = 'https://back-services.api-reservat.com/api/v1';
+const API_BASE_URL = '/api/v1';
 
 class UserService {
   private getAuthHeaders() {

@@ -11,7 +11,7 @@ import {
 } from '../types/viaje';
 import * as XLSX from 'xlsx';
 
-const API_BASE_URL = 'https://back-services.api-reservat.com/api/v1';
+const API_BASE_URL = '/api/v1';
 
 // Función para obtener el token de autenticación
 const getAuthToken = (): string | null => {

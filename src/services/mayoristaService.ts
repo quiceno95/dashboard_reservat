@@ -1,6 +1,6 @@
 import { MayoristaData, CreateMayoristaData, UpdateMayoristaData, MayoristaStats, MayoristaChartData } from '../types/mayorista';
 
-const API_BASE_URL = 'https://back-services.api-reservat.com/api/v1';
+const API_BASE_URL = '/api/v1';
 
 // Interfaces para las respuestas de la API oficial
 interface ApiResponseList {

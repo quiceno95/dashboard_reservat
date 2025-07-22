@@ -1,8 +1,8 @@
 import { LoginCredentials, LoginResponse } from '../types/auth';
 import { getCookie } from '../utils/auth';
 
-// Usar el proxy configurado en Vite para evitar problemas de CORS
-const API_BASE_URL = 'https://back-services.api-reservat.com/api/v1';
+// Usar ruta relativa para aprovechar el proxy en desarrollo y funcionar en producción
+const API_BASE_URL = '/api/v1';
 
 export const loginUser = async (credentials: LoginCredentials): Promise<LoginResponse> => {
   try {

@@ -1,6 +1,6 @@
 import { DatosRuta, RutaData, ActualizarRuta, RutasResponse, DatosOrigenDestino } from '../types/ruta';
 
-const API_BASE_URL = 'https://back-services.api-reservat.com/api/v1';
+const API_BASE_URL = '/api/v1';
 
 class RutaService {
   private getAuthHeaders() {

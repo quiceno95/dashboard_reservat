@@ -1,7 +1,7 @@
 import { HotelUnificado, ProveedorHotel, HotelInfo } from '../types/hotel';
 import { getCookie } from '../utils/auth';
 
-const API_BASE_URL = 'https://back-services.api-reservat.com/api/v1';
+const API_BASE_URL = '/api/v1';
 
 class HotelService {
   private getAuthHeaders() {

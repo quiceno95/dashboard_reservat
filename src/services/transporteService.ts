@@ -1,7 +1,7 @@
 import { TransporteData, TransporteResponse, CrearTransporteRequest, TransporteUpdateData } from '../types/transporte';
 import * as XLSX from 'xlsx';
 
-const API_BASE_URL = 'https://back-services.api-reservat.com';
+const API_BASE_URL = '';
 
 // Función para obtener el token de autenticación
 const getAuthToken = (): string | null => {
